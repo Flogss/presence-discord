@@ -104,6 +104,10 @@ export class PresenceClient {
           this.attempts = 0;
           console.log("[gateway] Session reprise");
           await this.pushPresence();
+        } else if (t === "SESSIONS_REPLACE") {
+          // Discord renvoie l'etat reel de toutes tes sessions : c'est le seul
+          // moyen, cote serveur, de verifier qu'il a bien accepte l'activite.
+          this.reportSessions(d);
         }
         break;
     }
@@ -148,6 +152,48 @@ export class PresenceClient {
       session_id: this.sessionId,
       seq: this.sequence,
     });
+  }
+
+  reportSessions(sessions = []) {
+    console.log(`[diag] ${sessions.length} session(s) Discord ouverte(s) :`);
+    for (const s of sessions) {
+      const client = s.client_info?.client ?? "?";
+      const names = (s.activities ?? []).map((a) => a.name).join(", ") || "aucune";
+      console.log(
+        `[diag]  - ${client} (${s.status}) : activite = ${names}`,
+      );
+    }
+
+    const mine = sessions.find((s) => s.session_id === this.sessionId);
+    const activity = mine?.activities?.[0];
+
+    if (!activity) {
+      console.warn(
+        "[diag] Discord a REFUSE l'activite de cette session.",
+        "Verifie Parametres > Confidentialite : 'Afficher l'activite en cours'.",
+      );
+      return;
+    }
+
+    console.log(
+      `[diag] Activite acceptee : name=${activity.name} details=${activity.details}`,
+    );
+    console.log(
+      `[diag]   image = ${activity.assets?.large_image ?? "AUCUNE"}`,
+    );
+    console.log(
+      `[diag]   boutons = ${JSON.stringify(activity.buttons ?? null)}`,
+    );
+
+    const others = sessions.filter(
+      (s) => s.session_id !== this.sessionId && s.session_id !== "all",
+    );
+    if (others.length) {
+      console.warn(
+        "[diag] D'autres sessions Discord sont ouvertes (client officiel).",
+        "Elles peuvent masquer cette presence : ferme-les pour tester.",
+      );
+    }
   }
 
   async pushPresence() {
