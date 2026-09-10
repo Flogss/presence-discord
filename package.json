@@ -1,0 +1,17 @@
+{
+  "name": "presence-discord",
+  "version": "1.0.0",
+  "description": "Rich Presence Discord persistante (Blackjack sur Stake) hebergee sur Railway",
+  "private": true,
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
