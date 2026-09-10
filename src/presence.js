@@ -30,10 +30,13 @@ async function buildAssets() {
   return assets;
 }
 
-export async function buildPresence() {
+export async function buildPresence({ sessionId } = {}) {
   const assets = await buildAssets();
 
   const activity = {
+    // Le client officiel envoie toujours un id d'activite ; sans lui Discord
+    // accepte la session mais jette silencieusement l'activite.
+    id: config.applicationId,
     name: config.activityName,
     type: 0, // 0 = "Joue a ..."
     application_id: config.applicationId,
@@ -41,7 +44,11 @@ export async function buildPresence() {
     state: config.state,
     timestamps: { start: startedAt },
     assets,
+    flags: 0,
+    created_at: Date.now(),
   };
+
+  if (sessionId) activity.session_id = sessionId;
 
   if (config.buttonLabel && config.buttonUrl) {
     activity.buttons = [config.buttonLabel];
@@ -53,5 +60,6 @@ export async function buildPresence() {
     activities: [activity],
     status: config.status,
     afk: config.afk,
+    broadcast: null,
   };
 }

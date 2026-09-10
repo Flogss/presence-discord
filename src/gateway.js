@@ -116,7 +116,7 @@ export class PresenceClient {
   async identify() {
     this.send(OP.IDENTIFY, {
       token: config.token,
-      capabilities: 30717,
+      capabilities: 161789,
       properties: {
         os: "Windows",
         browser: "Chrome",
@@ -129,7 +129,7 @@ export class PresenceClient {
         referrer: "",
         referring_domain: "",
         release_channel: "stable",
-        client_build_number: 306326,
+        client_build_number: 366666,
       },
       presence: await buildPresence(),
       compress: false,
@@ -159,12 +159,19 @@ export class PresenceClient {
     for (const s of sessions) {
       const client = s.client_info?.client ?? "?";
       const names = (s.activities ?? []).map((a) => a.name).join(", ") || "aucune";
+      const tag = s.session_id === this.sessionId ? " <= CETTE session" : "";
       console.log(
-        `[diag]  - ${client} (${s.status}) : activite = ${names}`,
+        `[diag]  - ${client} (${s.status}) [${s.session_id}] : activite = ${names}${tag}`,
       );
     }
 
     const mine = sessions.find((s) => s.session_id === this.sessionId);
+
+    if (!this.loggedRaw) {
+      this.loggedRaw = true;
+      console.log(`[diag] session_id local = ${this.sessionId}`);
+      console.log(`[diag] brut = ${JSON.stringify(mine ?? sessions)}`);
+    }
     const activity = mine?.activities?.[0];
 
     if (!activity) {
@@ -197,7 +204,10 @@ export class PresenceClient {
   }
 
   async pushPresence() {
-    this.send(OP.PRESENCE_UPDATE, await buildPresence());
+    this.send(
+      OP.PRESENCE_UPDATE,
+      await buildPresence({ sessionId: this.sessionId }),
+    );
     console.log(
       `[presence] "${config.activityName} - ${config.details}" envoyee`,
     );
