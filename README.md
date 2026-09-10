@@ -63,7 +63,11 @@ node --env-file=.env src/index.js
 
 - Le bouton n'est **pas visible pour toi-meme** : demande a un ami de regarder
   ton profil pour verifier.
-- Si la presence s'affiche sans logo, verifie que `LARGE_IMAGE_URL` pointe vers
-  une image publique (png/jpg) accessible sans authentification.
+- Pour le logo, deux options. Soit `LARGE_IMAGE_URL` pointe vers une image
+  publique (png/jpg) accessible sans authentification, et le service la fait
+  proxyfier par Discord. Soit — plus fiable — tu uploades l'image dans
+  *Developer Portal > Rich Presence > Art Assets*, et tu mets simplement le nom
+  de l'asset (ex: `stake`) dans `LARGE_IMAGE_URL`. Meme chose pour
+  `SMALL_IMAGE_URL`.
 - Sois deconnecte du Discord officiel ou non, la presence du serveur prend le
   relais ; si le client officiel tourne, il peut ecraser la presence.
